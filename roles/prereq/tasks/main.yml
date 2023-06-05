@@ -63,3 +63,9 @@
     path: /etc/sudoers
     validate: 'visudo -cf %s'
   when: ansible_os_family == "RedHat"
+
+- name: Install nfs-common From Apt-Get
+  become: yes
+  apt:
+    name: nfs-common
+    state: present

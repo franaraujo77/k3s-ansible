@@ -1,0 +1,3 @@
+---
+nginx_chroot: /etc/nginx
+nginx_site: default

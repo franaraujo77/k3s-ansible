@@ -1,0 +1,109 @@
+---
+- name: Install NGINX From Apt-Get
+  become: yes
+  apt:
+    name: nginx
+    state: present
+
+- name: Disable NGINX Default Virtual Host
+  become: yes
+  command:
+    cmd: unlink {{ nginx_chroot }}/sites-enabled/default
+  ignore_errors: true
+
+- name: ensures {{ nginx_chroot }}/ssl certificate dir exists
+  file: 
+    path: "{{ nginx_chroot }}/ssl"
+    state: directory
+  ignore_errors: true
+
+- name: ensures {{ nginx_chroot }}/sites-stream-enabled dir exists
+  file: 
+    path: "{{ nginx_chroot }}/sites-stream-enabled"
+    state: directory
+
+- name: ensures {{ nginx_chroot }}/sites-stream-available dir exists
+  file: 
+    path: "{{ nginx_chroot }}/sites-stream-available"
+    state: directory
+
+- name: Copy certificate pem files
+  ansible.builtin.copy:
+    src: files/dhparam.pem
+    dest: "{{ nginx_chroot }}/ssl/dhparam.pem"
+
+- name: Copy certificate pem conf files
+  ansible.builtin.copy:
+    src: files/ssl-params.conf
+    dest: "{{ nginx_chroot }}/ssl/ssl-params.conf"
+
+- name: Copy certificate self-signed certificate files
+  ansible.builtin.copy:
+    src: files/self-signed.conf
+    dest: "{{ nginx_chroot }}/ssl/self-signed.conf"
+
+- name: Copy certificate crt files
+  ansible.builtin.copy:
+    src: files/self-signed.crt
+    dest: "{{ nginx_chroot }}/ssl/self-signed.crt"
+
+- name: Copy certificate key files
+  ansible.builtin.copy:
+    src: files/self-signed.key
+    dest: "{{ nginx_chroot }}/ssl/self-signed.key"
+
+- name: Copy stream enabler script
+  ansible.builtin.copy:
+    src: files/nginx_enable_streams.sh
+    dest: "{{ nginx_chroot }}/nginx_enable_streams.sh"
+    mode: 0700
+
+- name: Copy NGINX Conf in place.
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_chroot }}/sites-available/{{ item.name }}_proxy.conf"
+    mode: 0644
+  with_items: "{{ nginx_sites }}"
+
+- name: Copy NGINX Stream Conf in place.
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_chroot }}/sites-stream-available/{{ item.name }}_proxy.conf"
+    mode: 0644
+  with_items: "{{ nginx_stream_sites }}"
+
+- name: Disable NGINX Virtual Host
+  become: yes
+  command:
+    cmd: "unlink {{ nginx_chroot }}/sites-enabled/{{ item.name }}_proxy.conf"
+  with_items: "{{ nginx_sites }}"
+  ignore_errors: true
+
+- name: Disable NGINX Stream Virtual Host
+  become: yes
+  command:
+    cmd: "unlink {{ nginx_chroot }}/sites-stream-enabled/{{ item.name }}_proxy.conf"
+  with_items: "{{ nginx_stream_sites }}"
+  ignore_errors: true
+
+- name: Configure Nginx streams
+  command: "{{ nginx_chroot }}/nginx_enable_streams.sh {{ nginx_chroot }}"
+  
+- name: Link NGINX site Reverse Proxy
+  become: yes
+  command:
+    cmd: "ln -s {{ nginx_chroot }}/sites-available/{{ item.name }}_proxy.conf {{ nginx_chroot }}/sites-enabled/{{ item.name }}_proxy.conf"
+  with_items: "{{ nginx_sites }}"
+
+- name: Link NGINX Stream site Reverse Proxy
+  become: yes
+  command:
+    cmd: "ln -s {{ nginx_chroot }}/sites-stream-available/{{ item.name }}_proxy.conf {{ nginx_chroot }}/sites-stream-enabled/{{ item.name }}_proxy.conf"
+  with_items: "{{ nginx_stream_sites }}"
+
+- name: Make Sure NGINX Service Is Running
+  become: yes
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes
