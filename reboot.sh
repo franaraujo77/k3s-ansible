@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ansible-playbook reboot.yml
+ansible-playbook -i ./inventory/k3s-cluster/hosts.ini reboot.yml
