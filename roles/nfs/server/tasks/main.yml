@@ -1,0 +1,4 @@
+---
+- name: Install NFS service
+  command:
+    cmd: "/root/nfs-install"

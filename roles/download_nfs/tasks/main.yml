@@ -1,0 +1,9 @@
+---
+
+- name: Download Openmediavault binary
+  get_url:
+    url: https://github.com/OpenMediaVault-Plugin-Developers/installScript/raw/master/install
+    dest: /root/nfs-install
+    owner: root
+    group: root
+    mode: 0755

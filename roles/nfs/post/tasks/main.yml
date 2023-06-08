@@ -1,0 +1,6 @@
+---
+
+- name: Remove tmp directory used for manifests
+  file:
+    path: /root/nfs-install
+    state: absent
