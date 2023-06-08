@@ -1,0 +1,13 @@
+---
+
+- hosts: nfs_server
+  gather_facts: yes
+  roles:
+    - role: prereq
+      become: true
+    - role: download_nfs
+      become: true
+    - role: raspberrypi
+      become: true
+    - role: nfs/server
+      become: true

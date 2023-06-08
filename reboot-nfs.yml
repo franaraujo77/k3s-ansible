@@ -1,0 +1,9 @@
+---
+- name: Reboot nfs_server
+  hosts: nfs_server
+  gather_facts: yes
+  tasks:
+    - name: Reboot the nodes (and Wait upto 5 mins max)
+      become: true
+      reboot:
+        reboot_timeout: 300
