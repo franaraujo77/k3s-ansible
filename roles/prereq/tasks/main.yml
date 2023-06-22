@@ -69,3 +69,22 @@
   apt:
     name: nfs-common
     state: present
+    update_cache: yes
+
+- name: Install apt-transport-https From Apt-Get
+  become: yes
+  apt:
+    name: apt-transport-https
+    state: present
+
+- name: Install ca-certificates From Apt-Get
+  become: yes
+  apt:
+    name: ca-certificates
+    state: present
+
+- name: Install software-properties-common From Apt-Get
+  become: yes
+  apt:
+    name: software-properties-common
+    state: present

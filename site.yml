@@ -11,6 +11,7 @@
       become: true
 
 - hosts: master
+  gather_facts: yes
   roles:
     - role: k3s/master
       become: true

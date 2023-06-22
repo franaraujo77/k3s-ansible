@@ -1,0 +1,40 @@
+---
+
+- hosts: load_balancer_agents
+  become: yes
+  roles:
+    - role: nginx 
+  vars:
+    nginx_sites:
+      - name: kibana
+        url: logs.k3s.karva.io
+        nginx_backend_servers:
+          - address: 192.168.15.253
+            port: 5601
+      - name: rancher
+        url: rancher.k3s.karva.io
+        nginx_backend_servers:
+          - address: 192.168.15.253
+            port: 443
+      - name: heimdall
+        url: heimdall.k3s.karva.io
+        nginx_backend_servers:
+          - address: 192.168.15.253
+            port: 443
+      - name: pihole
+        url: pihole.k3s.karva.io
+        nginx_backend_servers:
+          - address: 192.168.15.253
+            port: 443
+      - name: traefik
+        url: traefik.k3s.karva.io
+        nginx_backend_servers:
+          - address: 192.168.15.253
+            port: 443
+    nginx_stream_sites:
+      - name: piholeDns
+        url: 192.168.15.40
+        nginx_default_port: 53 udp
+        nginx_backend_servers:
+          - address: 192.168.15.253
+            port: 53
